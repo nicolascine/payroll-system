@@ -3,6 +3,7 @@ FROM node:20-alpine As development
 WORKDIR /usr/src/app
 
 COPY package*.json ./
+COPY tsconfig.json nest-cli.json ./
 
 RUN npm install
 
@@ -18,11 +19,11 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /usr/src/app
 
 COPY package*.json ./
+COPY tsconfig.json nest-cli.json ./
 
-RUN npm install --only=production
+RUN npm install --omit=dev
 
 COPY . .
-
 COPY --from=development /usr/src/app/dist ./dist
 
 CMD ["node", "dist/main"] 
