@@ -108,4 +108,11 @@ logs-backend: ## View backend logs
 logs-frontend: ## View frontend logs
 	@$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) logs -f frontend
 
-dev: up logs ## Start development environment and view logs 
+dev: setup-dev up logs ## Start development environment and view logs
+
+setup-dev: ## Setup development environment
+	@echo "${GREEN}Installing backend dependencies locally...${NC}"
+	@cd backend && npm install
+	@echo "${GREEN}Installing frontend dependencies locally...${NC}"
+	@cd frontend && npm install
+	@echo "${GREEN}Development environment ready!${NC}" 

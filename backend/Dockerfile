@@ -6,6 +6,7 @@ COPY package*.json ./
 COPY tsconfig.json nest-cli.json ./
 
 RUN npm install
+RUN npm install -g @nestjs/cli
 
 COPY . .
 
@@ -21,7 +22,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 COPY tsconfig.json nest-cli.json ./
 
-RUN npm install --omit=dev
+RUN npm ci --only=production
 
 COPY . .
 COPY --from=development /usr/src/app/dist ./dist

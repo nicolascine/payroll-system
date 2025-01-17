@@ -3,10 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AttendanceModule } from './attendance/attendance.module';
-import { AuthModule } from './auth/auth.module';
-import { CompaniesModule } from './companies/companies.module';
-import { EmployeesModule } from './employees/employees.module';
+import { CompanyModule } from './company/company.module';
 import { PayrollModule } from './payroll/payroll.module';
 
 @Module({
@@ -35,11 +32,8 @@ import { PayrollModule } from './payroll/payroll.module';
       inject: [ConfigService],
     }),
     ScheduleModule.forRoot(),
-    EmployeesModule,
-    AttendanceModule,
+    CompanyModule,
     PayrollModule,
-    AuthModule,
-    CompaniesModule,
   ],
 })
 export class AppModule {} 

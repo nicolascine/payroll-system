@@ -11,14 +11,32 @@ export class PayrollProcessor {
 
   @Process('calculate')
   async handleCalculation(job: Job) {
-    this.logger.debug('Start calculating payroll...');
-    const { companyId, period } = job.data;
+    this.logger.debug('Starting payroll calculation job...', {
+      jobId: job.id,
+      timestamp: new Date().toISOString()
+    });
+
+    const { companyId, period, attendanceList } = job.data;
 
     try {
-      await this.payrollService.calculatePayroll(companyId, period);
-      this.logger.debug(`Payroll calculated for company ${companyId}`);
+      const result = await this.payrollService.calculatePayroll(companyId, period, attendanceList);
+      
+      this.logger.debug('Payroll calculation completed successfully', {
+        jobId: job.id,
+        companyId,
+        period,
+        employeeCount: result.summary.employeeCount,
+        totalNetPay: result.summary.totalNetPay
+      });
+
+      return result;
     } catch (error) {
-      this.logger.error(`Error calculating payroll: ${error.message}`);
+      this.logger.error(`Error calculating payroll: ${error.message}`, {
+        jobId: job.id,
+        companyId,
+        period,
+        error: error.stack
+      });
       throw error;
     }
   }

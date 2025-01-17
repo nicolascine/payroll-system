@@ -38,11 +38,6 @@ export class PayrollSchedule {
     // Process weekly payroll
   }
 
-  @Cron('0 0 15,30 * *')
-  async processBiweeklyPayroll() {
-    // Process bi-weekly payroll
-  }
-
   @Cron('0 0 1 * *')
   async processMonthlyPayroll() {
     // Process monthly payroll
