@@ -1,8 +1,11 @@
 import { InjectQueue } from '@nestjs/bull';
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Queue } from 'bull';
+import { CalculatePayrollDto } from './dto/calculate-payroll.dto';
 import { PayrollService } from './payroll.service';
 
+@ApiTags('Payroll')
 @Controller('api/payroll')
 export class PayrollController {
   constructor(
@@ -11,21 +14,30 @@ export class PayrollController {
   ) {}
 
   @Post('calculate')
-  async calculatePayroll(@Body() data: any) {
+  @ApiOperation({ summary: 'Queue a new payroll calculation' })
+  @ApiResponse({ status: 201, description: 'Calculation queued successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
+  async calculatePayroll(@Body() data: CalculatePayrollDto) {
     const job = await this.payrollQueue.add('calculate', data);
     return { jobId: job.id, message: 'Payroll calculation queued' };
   }
 
   @Get('job/:id')
+  @ApiOperation({ summary: 'Get payroll calculation job status and result' })
+  @ApiResponse({ status: 200, description: 'Job details retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Job not found' })
   async getJobStatus(@Param('id') id: string) {
     const job = await this.payrollQueue.getJob(id);
+    
     if (!job) {
-      return { message: 'Job not found' };
+      throw new NotFoundException(`Job with ID ${id} not found`);
     }
 
-    const state = await job.getState();
-    const result = job.returnvalue;
-    const progress = await job.progress();
+    const [state, result, progress] = await Promise.all([
+      job.getState(),
+      job.returnvalue,
+      job.progress()
+    ]);
 
     return {
       id: job.id,
@@ -40,6 +52,8 @@ export class PayrollController {
   }
 
   @Get('queue/info')
+  @ApiOperation({ summary: 'Get queue statistics' })
+  @ApiResponse({ status: 200, description: 'Queue statistics retrieved successfully' })
   async getQueueInfo() {
     const [active, waiting, completed, failed] = await Promise.all([
       this.payrollQueue.getActive(),

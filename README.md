@@ -18,12 +18,105 @@ This project showcases modern software engineering practices through a real-worl
 
 ## 🏗️ Architecture
 
-Built on a modern microservices stack:
-- **Frontend**: Next.js 14+ for server-side rendering
-- **Backend**: NestJS with Bull Queue for async processing
-- **Database**: PostgreSQL for data persistence
-- **Cache/Queue**: Redis for job processing
-- **Containerization**: Docker & Docker Compose
+```mermaid
+---
+config:
+  layout: fixed
+---
+graph TB
+    subgraph "Frontend Layer"
+        A[Next.js Client] --> B[React Components]
+        B --> C[API Client]
+    end
+    subgraph "API Gateway"
+        D[NestJS API] --> E[Guards/Middleware]
+        E --> F[Controllers]
+        F --> G[Services]
+    end
+    subgraph "Business Logic"
+        G --> H[Repositories]
+        G --> I[Queue Producers]
+    end
+    subgraph "Background Processing"
+        I --> J[Bull Queue]
+        J --> K[Queue Consumers]
+        K --> L[Payroll Processor]
+    end
+    subgraph "Data Layer"
+        H --> M[(PostgreSQL)]
+        L --> M
+    end
+    subgraph "External Services"
+        N[Partner Attendance API]
+        O[Excel Parser Service]
+    end
+    subgraph "Infrastructure"
+        P[Redis]
+        Q[RabbitMQ]
+    end
+    C --> D
+    G --> N
+    G --> O
+    J --> P
+    I --> Q
+    K --> Q
+    style A fill:#94e2cd
+    style D fill:#94b5e2
+    style M fill:#e29494
+    style P fill:#e2d894
+    style Q fill:#e2d894
+```
+
+## 🔄 Data Flow
+
+1. **Frontend Flow**
+   - Next.js client renders UI components
+   - React components handle user interactions
+   - API client manages backend communication
+
+2. **API Gateway**
+   - Guards/Middleware handle authentication and validation
+   - Controllers route requests to appropriate services
+   - Services orchestrate business logic
+
+3. **Business Logic**
+   - Repositories manage data persistence
+   - Queue producers handle async job creation
+   - External service integration
+
+4. **Background Processing**
+   - Bull Queue manages job queuing
+   - Queue consumers process async tasks
+   - Payroll processor handles calculations
+
+5. **Data Layer**
+   - PostgreSQL stores application data
+   - Redis manages queue state
+   - Data consistency across services
+
+## 🛠️ Technology Stack
+
+### Frontend Layer
+- Next.js 14+
+- React 18
+- TailwindCSS
+- TypeScript
+
+### Backend Layer
+- NestJS
+- Bull Queue
+- TypeORM
+- Class Validator
+- Swagger/OpenAPI
+
+### Data Layer
+- PostgreSQL (Main Database)
+- Redis (Queue Management)
+
+### DevOps
+- Docker & Docker Compose
+- Environment Configuration
+- Health Checks
 
 ## ⚡ Key Features
 

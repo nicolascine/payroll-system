@@ -1,7 +1,7 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
-import { PayrollService } from './payroll.service';
+import { PayrollResult, PayrollService } from './payroll.service';
 
 @Processor('payroll')
 export class PayrollProcessor {
@@ -10,7 +10,7 @@ export class PayrollProcessor {
   constructor(private readonly payrollService: PayrollService) {}
 
   @Process('calculate')
-  async handleCalculation(job: Job) {
+  async handleCalculation(job: Job): Promise<PayrollResult> {
     this.logger.debug('Starting payroll calculation job...', {
       jobId: job.id,
       timestamp: new Date().toISOString()
