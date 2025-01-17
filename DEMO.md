@@ -190,3 +190,128 @@ curl -X POST http://localhost:3001/api/payroll/calculate \
 4. Sick Leave (8 hrs): Additional $160 gross
 5. Vacation (16 hrs): Additional $320 gross
 
+############# testing by curls
+
+# 🔥 API Test Commands
+
+## 1. Cálculo Simple (Single Employee)
+```bash
+curl -X POST http://localhost:3001/api/payroll/calculate \
+-H "Content-Type: application/json" \
+-d '{
+  "companyId": 1,
+  "period": "2024-03",
+  "attendanceList": [{
+    "employeeId": 1,
+    "regularHours": 160,
+    "overtimeHours": 15,
+    "sickLeaveHours": 0,
+    "vacationHours": 0,
+    "absenceHours": 0
+  }]
+}'
+```
+
+## 2. Cálculo Múltiple (Multiple Employees)
+```bash
+curl -X POST http://localhost:3001/api/payroll/calculate \
+-H "Content-Type: application/json" \
+-d '{
+  "companyId": 1,
+  "period": "2024-03",
+  "attendanceList": [
+    {
+      "employeeId": 1,
+      "regularHours": 160,
+      "overtimeHours": 15,
+      "sickLeaveHours": 0,
+      "vacationHours": 0,
+      "absenceHours": 0
+    },
+    {
+      "employeeId": 2,
+      "regularHours": 80,
+      "overtimeHours": 0,
+      "sickLeaveHours": 8,
+      "vacationHours": 0,
+      "absenceHours": 0
+    }
+  ]
+}'
+```
+
+## 3. Verificar Job (Check Job Status)
+```bash
+curl http://localhost:3001/api/payroll/job/1
+```
+
+## 4. Descargar Template (Download Template)
+```bash
+curl -O http://localhost:3001/api/payroll/sample
+```
+
+## 5. Subir Excel (Upload Excel)
+```bash
+curl -X POST http://localhost:3001/api/payroll/upload \
+-H "Content-Type: multipart/form-data" \
+-F "file=@/path/to/sample-attendance.xlsx"
+```
+
+## 6. Ver Cola (View Queue)
+```bash
+curl http://localhost:3001/admin/queues
+```
+
+## 7. Caso Error (Error Case)
+```bash
+curl -X POST http://localhost:3001/api/payroll/calculate \
+-H "Content-Type: application/json" \
+-d '{
+  "companyId": 1,
+  "period": "2024-03",
+  "attendanceList": [{
+    "employeeId": 1,
+    "regularHours": -160,
+    "overtimeHours": 0,
+    "sickLeaveHours": 0,
+    "vacationHours": 0,
+    "absenceHours": 0
+  }]
+}'
+```
+
+## 8. Caso Vacaciones (Vacation Case)
+```bash
+curl -X POST http://localhost:3001/api/payroll/calculate \
+-H "Content-Type: application/json" \
+-d '{
+  "companyId": 1,
+  "period": "2024-03",
+  "attendanceList": [{
+    "employeeId": 1,
+    "regularHours": 144,
+    "overtimeHours": 0,
+    "sickLeaveHours": 0,
+    "vacationHours": 16,
+    "absenceHours": 0
+  }]
+}'
+```
+
+## 9. Caso Licencia (Sick Leave Case)
+```bash
+curl -X POST http://localhost:3001/api/payroll/calculate \
+-H "Content-Type: application/json" \
+-d '{
+  "companyId": 1,
+  "period": "2024-03",
+  "attendanceList": [{
+    "employeeId": 1,
+    "regularHours": 152,
+    "overtimeHours": 0,
+    "sickLeaveHours": 8,
+    "vacationHours": 0,
+    "absenceHours": 0
+  }]
+}'
+```
