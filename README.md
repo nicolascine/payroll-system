@@ -51,20 +51,18 @@ graph TB
         O[Excel Parser Service]
     end
     subgraph "Infrastructure"
-        P[Redis]
-        Q[RabbitMQ]
+        P[(Redis)]
     end
     C --> D
     G --> N
     G --> O
     J --> P
-    I --> Q
-    K --> Q
+    I --> P
+    K --> P
     style A fill:#94e2cd
     style D fill:#94b5e2
     style M fill:#e29494
     style P fill:#e2d894
-    style Q fill:#e2d894
 ```
 
 ## 🔄 Data Flow
@@ -81,17 +79,17 @@ graph TB
 
 3. **Business Logic**
    - Repositories manage data persistence
-   - Queue producers handle async job creation
+   - Queue producers handle async job creation via Bull Queue
    - External service integration
 
 4. **Background Processing**
-   - Bull Queue manages job queuing
+   - Bull Queue manages job queuing in Redis
    - Queue consumers process async tasks
    - Payroll processor handles calculations
 
 5. **Data Layer**
    - PostgreSQL stores application data
-   - Redis manages queue state
+   - Redis manages queue state and job processing
    - Data consistency across services
 
 ## 🛠️ Technology Stack
