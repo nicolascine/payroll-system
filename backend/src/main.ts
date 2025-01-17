@@ -10,15 +10,21 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Global pipes
+  // Enable CORS
+  app.enableCors({
+    origin: ['http://localhost:3000'], // Frontend URL
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
+
+  // Validation pipe
   app.useGlobalPipes(new ValidationPipe());
 
   // Swagger setup
   const config = new DocumentBuilder()
     .setTitle('Payroll API')
-    .setDescription('The payroll management API description')
+    .setDescription('The payroll calculation API description')
     .setVersion('1.0')
-    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
@@ -27,7 +33,7 @@ async function bootstrap() {
   const serverAdapter = new ExpressAdapter();
   serverAdapter.setBasePath('/admin/queues');
 
-  const payrollQueue = app.get<Queue>(`BullQueue_payroll`);
+  const payrollQueue = app.get<Queue>('BullQueue_payroll');
   
   createBullBoard({
     queues: [new BullAdapter(payrollQueue)],
@@ -36,6 +42,6 @@ async function bootstrap() {
 
   app.use('/admin/queues', serverAdapter.getRouter());
 
-  await app.listen(process.env.PORT || 3001);
+  await app.listen(3001);
 }
 bootstrap(); 
