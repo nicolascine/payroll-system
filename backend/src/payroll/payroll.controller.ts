@@ -1,9 +1,13 @@
 import { InjectQueue } from '@nestjs/bull';
-import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Queue } from 'bull';
+import { Response } from 'express';
+import * as path from 'path';
 import { CalculatePayrollDto } from './dto/calculate-payroll.dto';
 import { PayrollService } from './payroll.service';
+import { generateSampleExcel } from './utils/excel-generator';
 
 @ApiTags('Payroll')
 @Controller('api/payroll')
@@ -74,5 +78,25 @@ export class PayrollController {
         failed: failed.map(job => ({ id: job.id, timestamp: job.timestamp })),
       }
     };
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Upload Excel file for payroll calculation' })
+  async uploadFile(@UploadedFile() file: any) {
+    const attendanceList = await this.payrollService.processExcelFile(file);
+    const job = await this.payrollQueue.add('calculate', {
+      companyId: 1,
+      period: '2024-03',
+      attendanceList
+    });
+    return { jobId: job.id, message: 'Excel file processed and calculation queued' };
+  }
+
+  @Get('sample')
+  @ApiOperation({ summary: 'Generate sample Excel file' })
+  async getSampleFile(@Res() res: Response) {
+    const fileName = generateSampleExcel();
+    return res.download(path.join(__dirname, '..', '..', 'public', fileName));
   }
 } 
