@@ -1,6 +1,8 @@
 # 🏢 Payroll Management System
 
-A modern payroll management system built with NestJS and Next.js that demonstrates best practices in software engineering, focusing on scalability, maintainability, and clean architecture.
+An enterprise-grade payroll management system built with NestJS and Next.js, designed for high scalability and maintainability. This solution automates payroll processing by integrating with third-party attendance management APIs, eliminating manual data handling and reducing errors. 
+
+It supports weekly, bi-weekly, and monthly payroll calculations for over 100,000 companies, processing inputs like worked hours, overtime, medical leaves, and absences. Engineered with clean architecture and best practices, this system enhances payroll administrators' efficiency, especially when managing multiple companies.
 
 ## 👨‍💻 Author
 
