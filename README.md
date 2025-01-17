@@ -1,14 +1,15 @@
 # Payroll Management System
 
-A modern payroll management system that integrates attendance control with payroll calculation.
+A modern payroll management system that integrates attendance control with payroll calculation using a queue-based architecture.
 
 ## 🚀 Features
 
 - Employee management
 - Attendance tracking integration
-- Payroll calculation
+- Asynchronous payroll calculation using Bull queues
+- Real-time queue monitoring
 - Excel file processing
-- REST API integration with attendance partner
+- REST API integration
 - Secure authentication and authorization
 - Rate limiting and security measures
 
@@ -16,8 +17,9 @@ A modern payroll management system that integrates attendance control with payro
 
 The application follows a microservices-based architecture with:
 - Frontend: Next.js 14+
-- Backend: Node.js with Express
-- Database: SQLite
+- Backend: NestJS with Bull Queue
+- Database: PostgreSQL
+- Message Queue: Redis
 - Docker containerization
 
 ## 🛠️ Tech Stack
@@ -31,13 +33,13 @@ The application follows a microservices-based architecture with:
 - TypeScript
 
 ### Backend
-- Node.js
-- Express
-- Sequelize ORM
-- SQLite
-- JWT Authentication
-- Express Rate Limit
-- Helmet Security
+- NestJS
+- Bull Queue
+- TypeORM
+- PostgreSQL
+- Redis
+- RabbitMQ
+- Bull Board for queue monitoring
 
 ### DevOps
 - Docker
@@ -55,39 +57,53 @@ The application follows a microservices-based architecture with:
 
 1. Clone the repository:
 
-2. Create .env file:
+bash
+git clone https://github.com/nicolascine/payroll-system
 
-3. Start the application:
+2. Start the application:
+
+```bash
+make build
+make up
+```
+
 
 The application will be available at:
 - Frontend: http://localhost:3000
-- Backend: http://localhost:3001
+- Backend API: http://localhost:3001
+- Queue Monitor: http://localhost:3001/admin/queues
+- RabbitMQ Management: http://localhost:15672
+- Swagger API Docs: http://localhost:3001/api
+
+## 📚 Documentation
+
+- [Demo Guide](DEMO.md) - Detailed demonstration guide
+- API Documentation: http://localhost:3001/api
+- Queue Monitor: http://localhost:3001/admin/queues
+
+## 🧪 Testing
+```bash
+Run tests
+make test
+```
+
+## Run linter
+```bash
+make lint
+```
 
 ## 📁 Project Structure
-
-`
-project/
-├── docker-compose.yml
-├── .env
-├── backend/
-│ ├── Dockerfile
-│ ├── package.json
-│ └── src/
-│ ├── index.js
-│ ├── config/
-│ ├── controllers/
-│ ├── models/
-│ ├── routes/
-│ ├── services/
-│ └── utils/
-└── frontend/
-├── Dockerfile
-├── package.json
-└── src/
-├── app/
-├── components/
-└── lib/
-`
+```
+.
+├── backend/ # NestJS backend application
+│ ├── src/
+│ │ ├── payroll/ # Payroll calculation module
+│ │ ├── attendance/ # Attendance tracking module
+│ │ └── ...
+│ └── ...
+├── frontend/ # Next.js frontend application
+└── docker-compose.yml # Docker composition file
+```
 
 
 ## 🔒 Security Features
@@ -99,57 +115,6 @@ project/
 - Input validation
 - Error handling
 
-## 🔍 API Documentation
-
-### Base URL
-
-### Endpoints
-
-#### Employees
-- `GET /employees` - List all employees
-- `POST /employees` - Create new employee
-- `GET /employees/:id` - Get employee details
-- `PUT /employees/:id` - Update employee
-- `DELETE /employees/:id` - Delete employee
-
-#### Attendance
-- `GET /attendance` - Get attendance records
-- `POST /attendance` - Create attendance record
-- `GET /attendance/:employeeId` - Get employee attendance
-
-#### Payroll
-- `POST /liquidations/calculate` - Calculate payroll
-- `GET /liquidations/:employeeId` - Get employee payroll
-
-## 🧪 Testing
-
-
-## 📈 Monitoring
-
-The application includes:
-- Winston logging
-- Error tracking
-- Performance monitoring
-- API request logging
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ## 📝 License
 
 This project is licensed under the MIT License - see the LICENSE file for details
-
-## 👥 Authors
-
-- Your Name - Initial work
-
-## 🙏 Acknowledgments
-
-- Hat tip to anyone whose code was used
-- Inspiration
-- etc
