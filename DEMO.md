@@ -1,26 +1,8 @@
 # 🚀 Payroll System Demo Guide
 
-A comprehensive guide for demonstrating the Payroll Management System's key features and capabilities.
-
-## 📋 Quick Setup (5 minutes)
-
+## 1. Basic Single Employee Calculation
 ```bash
-# 1. Start all services
-make build
-make up
-
-# 2. Verify services are running
-docker-compose ps
-
-# 3. Check API health
-curl http://localhost:3001/health
-```
-
-## 🎯 Demo Scenarios (30 minutes)
-
-### 1. Basic Single Employee Calculation (5 minutes)
-```bash
-# Calculate payroll for one employee (regular hours only)
+# Request
 curl -X POST http://localhost:3001/api/payroll/calculate \
 -H "Content-Type: application/json" \
 -d '{
@@ -29,43 +11,49 @@ curl -X POST http://localhost:3001/api/payroll/calculate \
   "attendanceList": [{
     "employeeId": 1,
     "regularHours": 160,
-    "overtimeHours": 0,
+    "overtimeHours": 15,
     "sickLeaveHours": 0,
-    "absenceHours": 0,
-    "vacationHours": 0
+    "vacationHours": 0,
+    "absenceHours": 0
   }]
 }'
 
-# Expected Response:
+# Response
 {
   "jobId": "1",
   "message": "Payroll calculation queued"
 }
 
-# Check calculation results
+# Check Results
 curl http://localhost:3001/api/payroll/job/1
 
-# Expected Result:
+# Result Response
 {
   "id": "1",
   "state": "completed",
-  "progress": 100,
   "result": {
-    "employeeId": 1,
-    "regularPay": 3200,    # 160 hours × $20/hour
-    "overtimePay": 0,
-    "sickLeavePay": 0,
-    "vacationPay": 0,
-    "grossPay": 3200,
-    "deductions": 640,     # 20% tax rate
-    "netPay": 2560
+    "calculations": [{
+      "employeeId": 1,
+      "regularPay": 3200.00,    # 160 hours × $20/hour
+      "overtimePay": 450.00,    # 15 hours × $20/hour × 1.5
+      "sickLeavePay": 0,
+      "vacationPay": 0,
+      "grossPay": 3650.00,
+      "deductions": 730.00,     # 20% tax
+      "netPay": 2920.00
+    }],
+    "summary": {
+      "employeeCount": 1,
+      "totalGrossPay": 3650.00,
+      "totalDeductions": 730.00,
+      "totalNetPay": 2920.00
+    }
   }
 }
 ```
 
-### 2. Complex Multi-Employee Scenario (10 minutes)
+## 2. Multiple Employees with Different Scenarios
 ```bash
-# Calculate payroll for multiple employees with different scenarios
 curl -X POST http://localhost:3001/api/payroll/calculate \
 -H "Content-Type: application/json" \
 -d '{
@@ -75,34 +63,96 @@ curl -X POST http://localhost:3001/api/payroll/calculate \
     {
       "employeeId": 1,
       "regularHours": 160,
-      "overtimeHours": 10,
+      "overtimeHours": 15,
       "sickLeaveHours": 0,
-      "absenceHours": 0,
-      "vacationHours": 0
+      "vacationHours": 0,
+      "absenceHours": 0
     },
     {
       "employeeId": 2,
       "regularHours": 152,
-      "sickLeaveHours": 8,
       "overtimeHours": 0,
-      "absenceHours": 0,
-      "vacationHours": 0
+      "sickLeaveHours": 8,
+      "vacationHours": 0,
+      "absenceHours": 0
     },
     {
       "employeeId": 3,
       "regularHours": 144,
-      "overtimeHours": 0,
+      "overtimeHours": 5,
       "sickLeaveHours": 0,
-      "absenceHours": 0,
-      "vacationHours": 16
+      "vacationHours": 16,
+      "absenceHours": 0
     }
   ]
 }'
+
+# Response with Multiple Calculations
+{
+  "id": "2",
+  "state": "completed",
+  "result": {
+    "calculations": [
+      {
+        "employeeId": 1,
+        "regularPay": 3200.00,
+        "overtimePay": 450.00,
+        "sickLeavePay": 0,
+        "vacationPay": 0,
+        "grossPay": 3650.00,
+        "deductions": 730.00,
+        "netPay": 2920.00
+      },
+      {
+        "employeeId": 2,
+        "regularPay": 3040.00,
+        "overtimePay": 0,
+        "sickLeavePay": 160.00,
+        "vacationPay": 0,
+        "grossPay": 3200.00,
+        "deductions": 640.00,
+        "netPay": 2560.00
+      },
+      {
+        "employeeId": 3,
+        "regularPay": 2880.00,
+        "overtimePay": 150.00,
+        "sickLeavePay": 0,
+        "vacationPay": 320.00,
+        "grossPay": 3350.00,
+        "deductions": 670.00,
+        "netPay": 2680.00
+      }
+    ],
+    "summary": {
+      "employeeCount": 3,
+      "totalGrossPay": 10200.00,
+      "totalDeductions": 2040.00,
+      "totalNetPay": 8160.00
+    }
+  }
+}
 ```
 
-### 3. Error Handling Demo (5 minutes)
+## 3. Excel Upload Example
 ```bash
-# 1. Invalid Hours (Negative Values)
+# Download sample
+curl -O http://localhost:3001/api/payroll/sample
+
+# Upload Excel
+curl -X POST http://localhost:3001/api/payroll/upload \
+-F "file=@sample-attendance.xlsx"
+
+# Response
+{
+  "jobId": "3",
+  "message": "Excel file processed and calculation queued"
+}
+```
+
+## 4. Error Cases
+```bash
+# Invalid Hours (Negative)
 curl -X POST http://localhost:3001/api/payroll/calculate \
 -H "Content-Type: application/json" \
 -d '{
@@ -111,110 +161,32 @@ curl -X POST http://localhost:3001/api/payroll/calculate \
   "attendanceList": [{
     "employeeId": 1,
     "regularHours": -160,
-    "overtimeHours": 0
+    "overtimeHours": 0,
+    "sickLeaveHours": 0,
+    "vacationHours": 0,
+    "absenceHours": 0
   }]
 }'
 
-# 2. Missing Required Fields
-curl -X POST http://localhost:3001/api/payroll/calculate \
--H "Content-Type: application/json" \
--d '{
-  "companyId": 1,
-  "period": "2024-03",
-  "attendanceList": [{
-    "employeeId": 1
-  }]
-}'
+# Error Response
+{
+  "statusCode": 400,
+  "message": ["regularHours must not be less than 0"],
+  "error": "Bad Request"
+}
 ```
 
-### 4. Queue Monitoring (5 minutes)
+## 🔍 Quick Reference
+- Regular Pay Rate: $20/hour
+- Overtime Rate: $30/hour (1.5x regular)
+- Tax Rate: 20%
+- Sick Leave: Paid at regular rate
+- Vacation: Paid at regular rate
 
-1. Access Bull Board UI:
-   - Open http://localhost:3001/admin/queues
-   - Show active jobs
-   - Show completed jobs
-   - Show failed jobs
-
-2. Check Queue Stats via API:
-```bash
-# Get queue statistics
-curl http://localhost:3001/api/payroll/queue/info
-
-# Monitor specific job
-curl http://localhost:3001/api/payroll/job/1
-```
-
-## 🎯 Key Features to Highlight (5 minutes)
-
-1. **Architecture**
-   - Clean Architecture principles
-   - Separation of concerns
-   - Queue-based processing
-
-2. **Technical Features**
-   - Input validation
-   - Error handling
-   - Async processing
-   - Real-time monitoring
-
-3. **Business Logic**
-   - Multiple employee processing
-   - Different pay types
-   - Tax calculations
-   - Summary reports
-
-## 🔍 Live Debugging (if needed)
-
-```bash
-# View backend logs
-docker-compose logs -f backend
-
-# Monitor Redis queue
-docker-compose exec redis redis-cli monitor
-
-# Check service health
-docker-compose ps
-```
-
-## 📊 Demo Results Matrix
-
-| Scenario | Input | Expected Output |
-|----------|-------|----------------|
-| Regular Hours | 160 hrs | $3,200 gross |
-| With Overtime | 10 OT hrs | $300 premium |
-| Sick Leave | 8 hrs | Paid at base |
-| Vacation | 16 hrs | Paid at base |
-
-## 🚨 Troubleshooting Guide
-
-If issues arise during demo:
-
-1. Service Issues
-```bash
-# Restart specific service
-docker-compose restart backend
-
-# Restart all services
-docker-compose down && docker-compose up -d
-```
-
-2. Queue Issues
-```bash
-# Clear Redis queue
-docker-compose exec redis redis-cli FLUSHALL
-
-# Check Redis connection
-docker-compose exec redis redis-cli ping
-```
-
-## 📝 Demo Checklist
-
-- [ ] Start all services
-- [ ] Verify API health
-- [ ] Run basic calculation
-- [ ] Show multi-employee scenario
-- [ ] Demonstrate error handling
-- [ ] Show queue monitoring
-- [ ] Highlight key features
-- [ ] Q&A session
+## 📊 Common Scenarios
+1. Full Time (160 hrs): $3,200 gross / $2,560 net
+2. Full Time + 15 OT hrs: $3,650 gross / $2,920 net
+3. Part Time (80 hrs): $1,600 gross / $1,280 net
+4. Sick Leave (8 hrs): Additional $160 gross
+5. Vacation (16 hrs): Additional $320 gross
 
